@@ -1,5 +1,5 @@
 # 🌡️ Temperature Converter
-## Oasis Infobyte Web Development Internship — Task 1
+## Oasis Infobyte Web Development Internship — Task 3
 
 ---
 
@@ -128,4 +128,4 @@ validation, result display, and keyboard support.
 
 ## 👤 Author
 **Nikhil Shivhare**
-Oasis Infobyte — Web Development Internship — Task 1
+Oasis Infobyte — Web Development Internship — Task 3
