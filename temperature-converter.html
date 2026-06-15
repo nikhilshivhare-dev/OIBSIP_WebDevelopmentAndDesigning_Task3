@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temperature Converter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f0fdf4;
+      --surface: #ffffff;
+      --border:  #bbf7d0;
+      --accent:  #16a34a;
+      --light:   #dcfce7;
+      --text:    #14532d;
+      --muted:   #4b7a5a;
+      --danger:  #dc2626;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 2rem;
+    }
+
+    .tc-wrap { width: 100%; max-width: 460px; }
+
+    .tc-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+    .tc-sub   { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
+
+    .tc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+    }
+
+    .tc-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: block; }
+    .tc-row   { margin-bottom: 1.25rem; }
+
+    input[type="number"] {
+      width: 100%; padding: 10px 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text);
+      font-size: 15px; outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type="number"]:focus { border-color: var(--accent); }
+
+    .tc-units { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tc-unit-btn {
+      flex: 1; min-width: 80px; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--muted);
+      font-size: 14px; cursor: pointer; transition: all 0.15s;
+    }
+    .tc-unit-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tc-unit-btn.active {
+      background: var(--light); color: var(--accent);
+      border-color: var(--accent); font-weight: 600;
+    }
+
+    .tc-convert-btn {
+      width: 100%; padding: 11px;
+      background: var(--accent); border: none;
+      border-radius: 8px; color: #fff;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    .tc-convert-btn:hover { background: #15803d; }
+
+    .tc-error { font-size: 13px; color: var(--danger); margin-top: 6px; display: none; }
+
+    .tc-result {
+      margin-top: 1.25rem; padding: 1rem 1.25rem;
+      background: var(--light); border: 1px solid var(--border);
+      border-radius: 8px; display: none;
+    }
+    .tc-result.show { display: block; }
+
+    .tc-result-label { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+
+    .tc-result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 10px;
+    }
+
+    .tc-result-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.75rem 1rem;
+    }
+
+    .tc-result-unit { font-size: 12px; color: var(--muted); }
+    .tc-result-val  { font-size: 22px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="tc-wrap">
+    <p class="tc-title">Temperature Converter</p>
+    <p class="tc-sub">Enter a temperature, choose its unit, then convert.</p>
+
+    <div class="tc-card">
+      <div class="tc-row">
+        <label class="tc-label" for="tc-input">Temperature value</label>
+        <input type="number" id="tc-input" placeholder="e.g. 100" />
+        <p class="tc-error" id="tc-error">Please enter a valid number.</p>
+      </div>
+
+      <div class="tc-row">
+        <span class="tc-label">Input unit</span>
+        <div class="tc-units">
+          <button class="tc-unit-btn active" data-unit="C">°C Celsius</button>
+          <button class="tc-unit-btn" data-unit="F">°F Fahrenheit</button>
+          <button class="tc-unit-btn" data-unit="K">K Kelvin</button>
+        </div>
+      </div>
+
+      <button class="tc-convert-btn" id="tc-btn">Convert Temperature</button>
+
+      <div class="tc-result" id="tc-result">
+        <p class="tc-result-label">Converted values</p>
+        <div class="tc-result-grid" id="tc-result-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedUnit = 'C';
+
+    document.querySelectorAll('.tc-unit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tc-unit-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedUnit = btn.dataset.unit;
+      });
+    });
+
+    document.getElementById('tc-btn').addEventListener('click', convert);
+    document.getElementById('tc-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') convert();
+    });
+
+    function convert() {
+      const raw = document.getElementById('tc-input').value.trim();
+      const err = document.getElementById('tc-error');
+      const result = document.getElementById('tc-result');
+      const grid = document.getElementById('tc-result-grid');
+
+      if (raw === '' || isNaN(Number(raw))) {
+        err.style.display = 'block';
+        result.classList.remove('show');
+        return;
+      }
+      err.style.display = 'none';
+
+      const val = parseFloat(raw);
+      let C, F, K;
+
+      if (selectedUnit === 'C') {
+        C = val; F = val * 9 / 5 + 32; K = val + 273.15;
+      } else if (selectedUnit === 'F') {
+        F = val; C = (val - 32) * 5 / 9; K = (val - 32) * 5 / 9 + 273.15;
+      } else {
+        K = val; C = val - 273.15; F = (val - 273.15) * 9 / 5 + 32;
+      }
+
+      grid.innerHTML = [
+        { unit: '°C', label: 'Celsius',    val: C },
+        { unit: '°F', label: 'Fahrenheit', val: F },
+        { unit: 'K',  label: 'Kelvin',     val: K },
+      ].map(o => `
+        <div class="tc-result-item">
+          <div class="tc-result-unit">${o.unit} ${o.label}</div>
+          <div class="tc-result-val">${parseFloat(o.val.toFixed(2))}</div>
+        </div>
+      `).join('');
+
+      result.classList.add('show');
+    }
+  </script>
+</body>
+</html>
