@@ -98,9 +98,6 @@ Double click `temperature-converter.html` to open in browser
 **Option 2 — Live Server in VS Code:**
 Right click the file → Open with Live Server
 
-**Option 3 — Live link:**
-👉 https://yourusername.github.io/OIBSIP_WebDevelopment_Task5/
-
 ---
 
 ## 🧠 JavaScript Concepts Used
@@ -118,11 +115,6 @@ Right click the file → Open with Live Server
 | `Array.map + join`   | Builds result grid HTML dynamically           |
 | CSS Variables        | --bg, --accent, --text for consistent theming |
 
----
-
-## 📸 Screenshots
-
-> Add a screenshot of your app here after uploading
 
 ---
 
